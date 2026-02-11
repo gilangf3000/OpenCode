@@ -6,6 +6,8 @@ import apiRoutes from "./routes/api.js";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(cors({ origin: "*" }));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -19,10 +21,11 @@ const limiter = rateLimit({
     message: "Too many requests, please try again later."
   }
 });
+
 app.use("/api", limiter);
 app.use("/api", apiRoutes);
 
-app.get("/", (req, res) => {
+app.get("/health", (req, res) => {
   res.json({
     status: "ok",
     message: "OpenCode is running"
@@ -30,7 +33,10 @@ app.get("/", (req, res) => {
 });
 
 app.use((req, res) => {
-  res.status(404).json({ status: "error", message: "Endpoint not found" });
+  res.status(404).json({
+    status: "error",
+    message: "Endpoint not found"
+  });
 });
 
 app.use((err, req, res, next) => {
@@ -42,6 +48,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
